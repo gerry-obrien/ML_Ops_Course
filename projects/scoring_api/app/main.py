@@ -7,6 +7,10 @@ from scoring import *
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"Welcome to the Apartment Scoring API!"}
+
 @app.get("/score")
 def score(address: str, surface: float, number_rooms: int):
     score = get_score(address, surface, number_rooms)
