@@ -1,17 +1,25 @@
-
-from typing import Union
-
 from fastapi import FastAPI
+from pydantic import BaseModel, Field
+from app.scoring import score_apartment
 
-from scoring import *
+app = FastAPI(title="Lab 2 - Apartment Scoring API")
 
-app = FastAPI()
+class ApartmentIn(BaseModel):
+    address: str = Field(..., description="The full address of the apartment")
+    surface: float = Field(..., gt=0)
+    rooms: int = Field(..., ge=1)
 
-@app.get("/")
-def read_root():
-    return {"Welcome to the Apartment Scoring API!"}
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
-@app.get("/score")
-def score(address: str, surface: float, number_rooms: int):
-    score = get_score(address, surface, number_rooms)
-    return {"score": score, "address": address}
+@app.post("/score")
+def score(apartment: ApartmentIn):
+    s = score_apartment(
+        surface=apartment.surface,
+        rooms=apartment.rooms
+    )
+    return {
+        "address": apartment.address,
+        "score": s
+    }
